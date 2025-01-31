@@ -1,13 +1,5 @@
 import passport from 'passport';
-import authProxy from './auth-proxy.js';
-import basic from './basic.js';
-import disableAuth from './disable-auth.js';
-import google from './google.js';
-import jwtServiceToken from './jwt-service-token.js';
-import ldap from './ldap.js';
-import local from './local.js';
-import oidc from './oidc.js';
-import saml from './saml.js';
+import saagieServiceToken from './saagie.js';
 
 // The serializeUser/deserializeUser functions apply regardless of the strategy used.
 // Given a user object, extract the id to use for session
@@ -40,15 +32,7 @@ passport.deserializeUser(async function (req, id, done) {
  * @param {object} models
  */
 async function authStrategies(config, models) {
-  authProxy(config);
-  basic(config);
-  await disableAuth(config, models);
-  google(config);
-  jwtServiceToken(config);
-  await ldap(config);
-  local(config);
-  await oidc(config);
-  saml(config);
+  saagieServiceToken(config);
 }
 
 export default authStrategies;

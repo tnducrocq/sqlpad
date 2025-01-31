@@ -1,5 +1,6 @@
 import passport from 'passport';
 import getHeaderUser from '../lib/get-header-user.js';
+import payloadExtractor from '../lib/saagie-token.js';
 import '../typedefs.js';
 
 /**
@@ -42,42 +43,14 @@ function sessionlessAuth(req, res, next) {
     return next();
   }
 
-  // If auth is disabled, "authenticate" with the custom disable-auth strategy
-  // This will stub in a noauth user into the users table, and associate the session accordingly
-  if (config.get('authDisabled')) {
-    return passport.authenticate('disable-auth', handleAuth)(req, res, next);
-  }
-
-  // If authorization header is present, attempt to authenticate based on the type of auth header
-  const authHeader = req.get('authorization');
-  if (authHeader) {
-    // If authorization starts with Bearer and serviceTokenSecret is set,
-    // we're going to guess it is a service token jwt
-    const serviceTokenSecret = config.get('serviceTokenSecret');
-    if (authHeader.startsWith('Bearer ') && serviceTokenSecret) {
-      return passport.authenticate('jwt', handleAuth)(req, res, next);
-    }
-
-    // If authoriztion starts with Basic and local auth isn't disabled,
-    // try HTTP basic authentication
-    if (
-      authHeader.startsWith('Basic ') &&
-      !config.get('userpassAuthDisabled')
-    ) {
-      return passport.authenticate('basic', handleAuth)(req, res, next);
-    }
-  }
-
-  // If auth proxy is turned on, try to derive a user from headers
-  if (config.get('authProxyEnabled')) {
-    const headerUser = getHeaderUser(req);
-    if (headerUser) {
-      return passport.authenticate('auth-proxy', handleAuth)(req, res, next);
-    }
-  }
-
   // None of the passive auth strategies matched, continue on
   // If middleware further down requires auth a response will be sent appropriately
+
+  // if SAAGIETOKENSAAGIE cookie is present, try to authenticate with it
+  if (payloadExtractor(config, req)) {
+    return passport.authenticate('saagie', handleAuth)(req, res, next);
+  }
+
   next();
 }
 

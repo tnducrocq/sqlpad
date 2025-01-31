@@ -1,5 +1,5 @@
 import trino from './_trino.js';
-import { formatSchemaQueryResults } from '../utils.js';
+import { formatSchemaQueryResults, formatCatalogQueryResults } from '../utils.js';
 
 const id = 'trino';
 const name = 'Trino';
@@ -29,18 +29,21 @@ function getTrinoSchemaSql(catalog, schema) {
  * Should return { rows, incomplete }
  * @param {string} query
  * @param {object} connection
+ * @param {object} user
  */
-function runQuery(query, connection) {
+function runQuery(query, connection, user) {
   let incomplete = false;
   const rows = [];
   const port = connection.port || 8080;
   const protocol = connection.useHTTPS ? 'https' : 'http';
+  console.log('****trino: runQuery', user);
   const config = {
     url: `${protocol}://${connection.host}:${port}`,
     user: connection.username,
     catalog: connection.catalog,
-    schema: connection.schema,
+    jwt: user.token,
   };
+
   return trino.send(config, query).then((result) => {
     if (!result) {
       throw new Error('No result returned');
@@ -65,19 +68,30 @@ function runQuery(query, connection) {
  * Test connectivity of connection
  * @param {*} connection
  */
-function testConnection(connection) {
+function testConnection(connection, user) {
   const query = "SELECT 'success' AS TestQuery";
-  return runQuery(query, connection);
+  return runQuery(query, connection, user);
 }
 
 /**
  * Get schema for connection
  * @param {*} connection
  */
-function getSchema(connection) {
+function getSchema(connection, user) {
   const schemaSql = getTrinoSchemaSql(connection.catalog, connection.schema);
-  return runQuery(schemaSql, connection).then((queryResult) =>
+  return runQuery(schemaSql, connection, user).then((queryResult) =>
     formatSchemaQueryResults(queryResult)
+  );
+}
+
+/**
+ * Get catalog for connection
+ * @param {*} connection
+ */
+function getCatalog(connection, user) {
+  const schemaSql = getTrinoSchemaSql(connection.catalog, connection.schema);
+  return runQuery(schemaSql, connection, user).then((queryResult) =>
+    queryResult.rows.map(row => row.Catalog)
   );
 }
 
@@ -93,19 +107,9 @@ const fields = [
     label: 'Port (optional)',
   },
   {
-    key: 'username',
-    formType: 'TEXT',
-    label: 'Database Username',
-  },
-  {
     key: 'catalog',
     formType: 'TEXT',
     label: 'Catalog',
-  },
-  {
-    key: 'schema',
-    formType: 'TEXT',
-    label: 'Schema',
   },
   {
     key: 'useHTTPS',
@@ -118,6 +122,7 @@ export default {
   id,
   name,
   fields,
+  getCatalog,
   getSchema,
   runQuery,
   testConnection,

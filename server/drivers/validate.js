@@ -39,6 +39,7 @@ function validate(id, driver) {
     throw new Error(`${id} must export a name`);
   }
 
+  validateFunction(driver, 'getCatalog');
   validateFunction(driver, 'getSchema');
   validateFunction(driver, 'runQuery');
   validateFunction(driver, 'testConnection');

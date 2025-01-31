@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import https from 'https';
+
 const NEXT_URI_TIMEOUT = 100;
 
 export default { send };
@@ -10,13 +12,14 @@ function wait(ms) {
 
 // Get Trino headers from config
 function getHeaders(config) {
-  const headers = { 'X-Trino-User': config.user };
+  const headers = { };
+
   if (config.catalog) {
     headers['X-Trino-Catalog'] = config.catalog;
   }
-  if (config.schema) {
-    headers['X-Trino-Schema'] = config.schema;
-  }
+
+  headers['Authorization'] = "Bearer " + config.jwt;
+  headers['Content-Type'] = 'text/plain';
   return headers;
 }
 
@@ -25,16 +28,29 @@ function send(config, query) {
   if (!config.url) {
     return Promise.reject(new Error('config.url is required'));
   }
+
   const results = {
     data: [],
   };
+
+  const agent = new https.Agent({ rejectUnauthorized: false });
+
+  console.log('****trino: send', query);
+
+  const headers = getHeaders(config);
   return fetch(`${config.url}/v1/statement`, {
     method: 'POST',
     body: query,
-    headers: getHeaders(config),
+    headers: headers,
+    agent: agent,
   })
-    .then((response) => response.json())
-    .then((statement) => handleStatementAndGetMore(results, statement, config));
+  .then((response) => {
+    const json = response.json()
+    console.log('****trino: receive', json);
+    return json;
+  })
+  .then((statement) => handleStatementAndGetMore(results, statement, config))
+  .catch(error => console.error('Error:', error));
 }
 
 function updateResults(results, statement) {
@@ -44,6 +60,9 @@ function updateResults(results, statement) {
   if (statement.columns) {
     results.columns = statement.columns;
   }
+
+  console.log('****trino: updateResults', results);
+   
   return results;
 }
 
@@ -57,8 +76,15 @@ function handleStatementAndGetMore(results, statement, config) {
   if (!statement.nextUri) {
     return Promise.resolve(results);
   }
+
+  const agent = new https.Agent({ rejectUnauthorized: false });
+
   return wait(NEXT_URI_TIMEOUT)
-    .then(() => fetch(statement.nextUri, { headers: getHeaders(config) }))
-    .then((response) => response.json())
+    .then(() => fetch(statement.nextUri, { agent: agent, headers: getHeaders(config) }))
+    .then((response) => {
+      const json = response.json()
+      console.log('****trino: receive', json);
+      return json;
+    })
     .then((statement) => handleStatementAndGetMore(results, statement, config));
 }

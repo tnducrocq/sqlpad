@@ -132,3 +132,7 @@ export function formatSchemaQueryResults(queryResult) {
     tables: Object.values(tablesById),
   };
 }
+
+export function formatCatalogQueryResults(queryResult) {
+  return [];
+}
