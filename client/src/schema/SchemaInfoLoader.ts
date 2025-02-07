@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { loadSchema } from '../stores/editor-actions';
-import { useSessionConnectionId } from '../stores/editor-store';
+import { useSessionCatalog, useSessionConnectionId } from '../stores/editor-store';
 
 /**
  * Instead of loading schema on selection,
@@ -10,12 +10,12 @@ import { useSessionConnectionId } from '../stores/editor-store';
  */
 function SchemaInfoLoader() {
   const selectedConnectionId = useSessionConnectionId();
-
+  const selectedCatalog = useSessionCatalog();
   useEffect(() => {
-    if (selectedConnectionId) {
-      loadSchema(selectedConnectionId);
+    if (selectedConnectionId && selectedCatalog) {
+      loadSchema(selectedConnectionId, selectedCatalog);
     }
-  }, [selectedConnectionId]);
+  }, [selectedConnectionId, selectedCatalog]);
 
   return null;
 }

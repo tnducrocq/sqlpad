@@ -23,6 +23,7 @@ import {
   INITIAL_SESSION,
   INITIAL_STATE,
   SchemaState,
+  CatalogState,
   useEditorStore,
 } from './editor-store';
 
@@ -130,6 +131,7 @@ export const initEditor = async (
     ]);
 
     let initialConnectionId = '';
+    let initialCatalog = '';
 
     if (connections.length === 1) {
       initialConnectionId = connections[0].id;
@@ -177,8 +179,8 @@ export const initEditor = async (
 
     const { focusedSessionId } = getState();
     setSession(focusedSessionId, { connectionId: initialConnectionId });
-    if (initialConnectionId) {
-      loadSchema(initialConnectionId);
+    if (initialConnectionId && initialCatalog) {
+      loadSchema(initialConnectionId, initialCatalog);
     }
     setState({ initialized: true });
   } catch (error) {
@@ -304,6 +306,23 @@ export function selectConnectionId(connectionId: string) {
   setSession(focusedSessionId, {
     connectionId,
     connectionClient: undefined,
+  });
+}
+
+/**
+ * Select connection and disconnect connectionClient if it exists
+ * @param connectionId
+ */
+export function selectCatalog(connectionId: string, catalog: string) {
+  const { focusedSessionId } = getState();
+
+  localforage
+    .setItem('selectedCatalog', catalog)
+    .catch((error) => message.error(error));
+
+  setSession(focusedSessionId, {
+    connectionId,
+    catalog
   });
 }
 
@@ -783,6 +802,48 @@ export function toggleVisProperties() {
   setSession(focusedSessionId, { showVisProperties: !showVisProperties });
 }
 
+export function setCatalogState(connectionId: string, catalogState: CatalogState) {
+  const { catalogStates } = getState();
+  const update = {
+    ...catalogStates,
+    [connectionId]: catalogState,
+  };
+  setState({ catalogStates: update });
+}
+
+/**
+ * Get catalog via API and store into editor store
+ * @param connectionId - connection id to get catalog for
+ * @param reload - force cache refresh for catalog
+ */
+export async function loadCatalog(connectionId: string, reload?: boolean) {
+  const { catalogStates, focusedSessionId } = getState();
+
+  if (!catalogStates[connectionId] || reload) {
+    setCatalogState(connectionId, {
+      loading: true,
+    });
+
+    const json = await api.getConnectionCatalog(connectionId, reload);
+    const { error, data } = json;
+
+    if (error) {
+      setCatalogState(connectionId, {
+        loading: false,
+        error,
+      });
+      return;
+    }
+
+    setCatalogState(connectionId, {
+      loading: false,
+      connectionCatalog: data,
+      error: undefined,
+    });
+
+  }
+}
+
 export function setSchemaState(connectionId: string, schemaState: SchemaState) {
   const { schemaStates } = getState();
   const update = {
@@ -797,7 +858,7 @@ export function setSchemaState(connectionId: string, schemaState: SchemaState) {
  * @param connectionId - connection id to get schema for
  * @param reload - force cache refresh for schema
  */
-export async function loadSchema(connectionId: string, reload?: boolean) {
+export async function loadSchema(connectionId: string, catalog: string, reload?: boolean) {
   const { schemaStates, focusedSessionId } = getState();
   const { showSchema, schemaExpansions } = getState().getFocusedSession();
 
@@ -806,7 +867,7 @@ export async function loadSchema(connectionId: string, reload?: boolean) {
       loading: true,
     });
 
-    const json = await api.getConnectionSchema(connectionId, reload);
+    const json = await api.getConnectionCatalogSchema(connectionId, catalog, reload);
     const { error, data } = json;
 
     if (error) {

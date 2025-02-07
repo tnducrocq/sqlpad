@@ -4,6 +4,7 @@ import {
   Batch,
   ChartFields,
   ConnectionClient,
+  ConnectionCatalog,
   ConnectionSchema,
   QueryResultFormat,
   Statement,
@@ -11,6 +12,12 @@ import {
 } from '../types';
 
 export type ExpandedMap = { [itemPath: string]: boolean };
+
+export interface CatalogState {
+  loading: boolean;
+  connectionCatalog?: ConnectionCatalog;
+  error?: string;
+}
 
 export interface SchemaState {
   loading: boolean;
@@ -22,6 +29,7 @@ export interface EditorSession {
   id: string;
   showSchema: boolean;
   showVisProperties: boolean;
+  catalog: string;
   schemaExpansions: { [conectionId: string]: ExpandedMap };
   connectionId: string;
   connectionClient?: ConnectionClient;
@@ -60,6 +68,7 @@ export type EditorStoreState = {
   batches: Record<string, Batch>;
   queryResultFormat: QueryResultFormat;
   statements: Record<string, Statement>;
+  catalogStates: { [conectionId: string]: CatalogState };
   schemaStates: { [conectionId: string]: SchemaState };
   getFocusedSession: () => EditorSession;
   getSession: (sessionId: string) => EditorSession | undefined;
@@ -71,6 +80,7 @@ export const INITIAL_SESSION: EditorSession = {
   id: INITIAL_SESSION_ID,
   showSchema: true,
   showVisProperties: false,
+  catalog: '',
   schemaExpansions: {},
   connectionId: '',
   connectionClient: undefined,
@@ -108,6 +118,7 @@ export const INITIAL_STATE = {
   },
   batches: {},
   statements: {},
+  catalogStates: {},
   schemaStates: {},
   queryResultFormat: 'column' as QueryResultFormat,
 };
@@ -195,6 +206,10 @@ export function useSessionConnectionId(): string {
   return useEditorStore((s) => s.getFocusedSession().connectionId);
 }
 
+export function useSessionCatalog(): string {
+  return useEditorStore((s) => s.getFocusedSession().catalog);
+}
+
 export function useExecutionStarting(): boolean {
   return useEditorStore((s) => s.getFocusedSession().isExecutionStarting);
 }
@@ -279,6 +294,16 @@ export function useSessionSchemaExpanded(connectionId?: string) {
       return {};
     }
     return schemaExpansions[connectionId];
+  });
+}
+
+export function useCatalogState(connectionId?: string) {
+  return useEditorStore((s) => {
+    if (!connectionId || !s.catalogStates[connectionId]) {
+      const emptyCatalogState: CatalogState = { loading: false };
+      return emptyCatalogState;
+    }
+    return s.catalogStates[connectionId];
   });
 }
 

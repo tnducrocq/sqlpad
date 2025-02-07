@@ -290,6 +290,10 @@ export interface ConnectionSchema {
   tables?: SchemaTable[];
 }
 
+export interface ConnectionCatalog {
+  catalogs?: string[];
+}
+
 export type QueryHistoryResponse = Array<Record<string, any>>;
 
 export type QueryResultFormat = 'column' | 'fullColumns';

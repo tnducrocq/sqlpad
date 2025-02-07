@@ -6,7 +6,7 @@ import styles from './Logo.module.css';
  * It could show a logo someday, or maybe be a primary button if it did some action
  */
 function Logo() {
-  return <div className={styles.logo}>SQLPad</div>;
+  return <div className={styles.logo}>Saagie Lakehouse</div>;
 }
 
 export default Logo;

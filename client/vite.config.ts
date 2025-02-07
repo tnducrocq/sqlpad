@@ -43,6 +43,7 @@ const getConfig = ({ command, mode }) => {
     server: {
       port: 3000,
       proxy,
+      allowedHosts: true
     },
     build: {
       outDir: 'build',

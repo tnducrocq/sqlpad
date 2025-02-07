@@ -23,20 +23,7 @@ function AppMenu() {
   return (
     <div>
       <IconMenu variant="ghost" icon={<DotsVerticalIcon aria-label="menu" />}>
-        <MenuItem hidden={hideUserItems} onSelect={() => setShowProfile(true)}>
-          Profile
-        </MenuItem>
-        <MenuItem onSelect={() => setShowAbout(true)}>About</MenuItem>
-        <MenuItem
-          hidden={hideUserItems}
-          onSelect={async () => {
-            await api.signout();
-            history.push(`/signin`);
-            resetState();
-          }}
-        >
-          Sign out
-        </MenuItem>
+        <MenuItem onSelect={() => setShowAbout(true)}>About</MenuItem>        
       </IconMenu>
 
       <AboutModal visible={showAbout} onClose={() => setShowAbout(false)} />

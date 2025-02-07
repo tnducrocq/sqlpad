@@ -35,13 +35,6 @@ function AppHeaderAdminSection() {
         visible={showConnections}
         onClose={() => setShowConnections(false)}
       />
-      <Button variant="ghost" onClick={() => setShowConnectionAccesses(true)}>
-        Access
-      </Button>
-      <ConnectionAccessListDrawer
-        visible={showConnectionAccesses}
-        onClose={() => setShowConnectionAccesses(false)}
-      />
       <Button
         variant="ghost"
         onClick={() => setShowUsers(true)}
@@ -58,17 +51,6 @@ function AppHeaderAdminSection() {
       >
         <UserList />
       </Drawer>
-      <Button
-        variant="ghost"
-        onClick={() => setShowServiceTokens(true)}
-        hidden={!showServiceTokensButton}
-      >
-        Service Tokens
-      </Button>
-      <ServiceTokenListDrawer
-        visible={showServiceTokens}
-        onClose={() => setShowServiceTokens(false)}
-      />
     </>
   );
 }

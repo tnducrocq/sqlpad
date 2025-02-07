@@ -8,6 +8,7 @@ import ToolbarRunButton from './ToolbarRunButton';
 import ToolbarCancelButton from './ToolbarCancelButton';
 import ToolbarSpacer from './ToolbarSpacer';
 import ToolbarToggleSchemaButton from './ToolbarToggleSchemaButton';
+import { CatalogDropdown } from './CatalogDropdown';
 
 function Toolbar() {
   return (
@@ -22,6 +23,8 @@ function Toolbar() {
       <div style={{ display: 'flex' }}>
         <ToolbarToggleSchemaButton />
         <ConnectionDropDown />
+        <ToolbarSpacer />
+        <CatalogDropdown />
         <ToolbarSpacer />
         <ToolbarConnectionClientButton />
         <ToolbarSpacer grow />

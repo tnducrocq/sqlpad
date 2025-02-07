@@ -14,7 +14,7 @@ function AboutModal({ visible, onClose }: Props) {
     <>
       <Modal
         width={650}
-        title="About SQLPad"
+        title="About Saagie SQLPad"
         visible={visible}
         onClose={onClose}
       >

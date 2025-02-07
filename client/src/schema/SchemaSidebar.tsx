@@ -22,6 +22,7 @@ import Tooltip from '../common/Tooltip';
 import { loadSchema, toggleSchemaItem } from '../stores/editor-actions';
 import {
   useSchemaState,
+  useSessionCatalog,
   useSessionConnectionId,
   useSessionSchemaExpanded,
 } from '../stores/editor-store';
@@ -81,6 +82,7 @@ function CopyMenuItem({ id, value }: { id: string; value: string }) {
 
 function SchemaSidebar() {
   const connectionId = useSessionConnectionId();
+  const catalog = useSessionCatalog();
   const [search, setSearch] = useState('');
   const [dimensions, setDimensions] = useState({
     width: -1,
@@ -96,8 +98,8 @@ function SchemaSidebar() {
 
   const handleRefreshClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (connectionId) {
-      loadSchema(connectionId, true);
+    if (connectionId && catalog) {
+      loadSchema(connectionId, catalog, true);
     }
   };
 

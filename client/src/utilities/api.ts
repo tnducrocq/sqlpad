@@ -7,6 +7,7 @@ import {
   BatchHistoryItem,
   Connection,
   ConnectionAccess,
+  ConnectionCatalog,
   ConnectionDetail,
   ConnectionSchema,
   Driver,
@@ -190,6 +191,12 @@ export const api = {
     return api.delete(`/api/queries/${queryId}`);
   },
 
+  useCatalogs(connectionId: string) {
+    return useSWR<string[]>(`/api/connections/${connectionId}/catalog`, {
+      dedupingInterval: 60000,
+    });
+  },
+
   useConnections() {
     return useSWR<Connection[]>('/api/connections', {
       dedupingInterval: 60000,
@@ -216,6 +223,27 @@ export const api = {
     const qs = reload ? '?reload=true' : '';
     return api.get<ConnectionSchema>(
       `/api/connections/${connectionId}/schema${qs}`
+    );
+  },
+
+  getConnectionCatalogSchema(connectionId: string, catalog: string, reload?: boolean) {
+    const qs = reload ? '?reload=true' : '';
+    return api.get<ConnectionSchema>(
+      `/api/connections/${connectionId}/${catalog}/schema${qs}`
+    );
+  },
+
+  getConnectionCatalog(connectionId: string, reload?: boolean) {
+    const qs = reload ? '?reload=true' : '';
+    return api.get<ConnectionCatalog>(
+      `/api/connections/${connectionId}/catalog${qs}`
+    );
+  },
+
+  useConnectionCatalogSchema(connectionId: string, catalog: string, reload?: boolean) {
+    const qs = reload ? '?reload=true' : '';
+    return useSWR<ConnectionSchema>(
+      `/api/connections/${connectionId}/${catalog}/schema${qs}`
     );
   },
 

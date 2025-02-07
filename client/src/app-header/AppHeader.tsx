@@ -14,20 +14,17 @@ function Appheader() {
       style={{
         width: '100%',
         color: '#fff',
-        backgroundColor: 'rgba(0, 0, 0, 0.84)',
+        backgroundColor: '#1f3047'/*rgba(139, 21, 21, 0.84)'*/,
         padding: 6,
         borderBottom: '1px solid rgb(204, 204, 204)',
       }}
     >
       <div style={{ display: 'flex' }}>
-        <Logo />
         <QueryListButton />
         <ToolbarNewQueryButton />
         <HistoryButton />
         <AppHeaderAdminSection />
         <AppHeaderSpacer grow />
-        <AppHeaderUser />
-        <AppMenu />
       </div>
     </div>
   );

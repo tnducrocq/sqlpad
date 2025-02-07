@@ -14,48 +14,6 @@ function AboutContent({ version = '' }: Props) {
         <strong>Version</strong>: {version}
       </p>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          marginBottom: 16,
-        }}
-      >
-        <a
-          href="http://getsqlpad.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={LINK_STYLE}
-        >
-          Project page <OpenInNewIcon size={18} />
-        </a>
-        <a
-          href="https://github.com/sqlpad/sqlpad/issues"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={LINK_STYLE}
-        >
-          Submit an Issue <OpenInNewIcon size={18} />
-        </a>
-        <a
-          href="https://github.com/sqlpad/sqlpad/blob/master/CHANGELOG.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={LINK_STYLE}
-        >
-          Changelog <OpenInNewIcon size={18} />
-        </a>
-        <a
-          href="https://github.com/sqlpad/sqlpad"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={LINK_STYLE}
-        >
-          GitHub <OpenInNewIcon size={18} />
-        </a>
-      </div>
-
       <p>
         <strong>Shortcuts</strong>
       </p>
