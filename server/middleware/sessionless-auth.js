@@ -1,6 +1,5 @@
-import passport from 'passport';
-import getHeaderUser from '../lib/get-header-user.js';
-import payloadExtractor from '../lib/saagie-token.js';
+import passport from 'passport'; 
+import { getSaagieCookie, payloadExtractor } from '../lib/saagie-token.js';
 import '../typedefs.js';
 
 /**
@@ -46,8 +45,8 @@ function sessionlessAuth(req, res, next) {
   // None of the passive auth strategies matched, continue on
   // If middleware further down requires auth a response will be sent appropriately
 
-  // if SAAGIETOKENSAAGIE cookie is present, try to authenticate with it
-  if (payloadExtractor(config, req)) {
+  const jwt = getSaagieCookie(config, req);
+  if (payloadExtractor(config, jwt)) {
     return passport.authenticate('saagie', handleAuth)(req, res, next);
   }
 

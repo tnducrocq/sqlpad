@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy as PassportCustomStrategy } from 'passport-custom';
 //import axios from 'axios';
 import appLog from '../lib/app-log.js';
-import payloadExtractor from '../lib/saagie-token.js';
+import { getSaagieCookie, payloadExtractor } from '../lib/saagie-token.js';
 
 /**
  * Adds Saagie JWT Service Token auth strategy if configured
@@ -18,32 +18,29 @@ function enableSaagieServiceToken(config) {
     passport.use('saagie', new PassportCustomStrategy(async (req, done) => {
             const { models } = req;
 
-            const payload = payloadExtractor(config, req);
+            const saagieToken = getSaagieCookie(config, req);
+            const payload = payloadExtractor(config, saagieToken);
             if (!payload) {
                 appLog.info('no saagie token.');
                 return done(null, false, { message: 'no saagie token' });
             }
+
+            const user = {
+                id: payload["sub"],
+                email: payload["preferred_username"],
+                role: "viewer", // TODO put viewer for disable editing connections or admin for all rights
+                token: saagieToken,
+            } 
         
             try {
-                /*const response = await axios.get('http://localhost:8050/api/rights', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-        
-                const userRights = response.data;
-        
-                if (!userRights || !userRights.valid) {
-                    return done(null, false);
-                }*/
-
-                var user = await models.users.findOneByEmail(payload.email);
-                if (!user) {
-                    user = await models.users.create(payload); 
+                if (!await models.users.findOneByEmail(user.email)) {
+                    await models.users.create(user); 
                 } else {
-                    user = await models.users.update(user.id, payload);
+                    await models.users.update(user.id, user);
                 }
                 
                 appLog.info('done saagie token.');
-                return done(null, payload);
+                return done(null, user);
             } catch (error) {
                 appLog.error('Erreur API Auth:', error.message); 
                 return done(null, false, { message: 'no valid saagie token' });
