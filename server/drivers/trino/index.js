@@ -4,6 +4,7 @@ import { formatSchemaQueryResults } from '../utils.js';
 const id = 'trino';
 const name = 'Trino';
 const asynchronous = true;
+const hasCatalog = true;
 
 function getTrinoSchemaSql(catalog, schema) {
   const schemaSql = schema ? `AND table_schema = '${schema}'` : '';
@@ -209,6 +210,7 @@ export default {
   name,
   fields,
   asynchronous,
+  hasCatalog,
   getCatalog,
   getSchema,
   runQuery,

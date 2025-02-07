@@ -191,20 +191,11 @@ async function getSchema(connection) {
   }
 }
 
-/**
- * Get catalog for connection
- * @param {*} connection
- */
-async function getCatalog(connection) {
-  return [];
-}
-
 export default {
   Client,
   id,
   name,
   fields,
-  getCatalog,
   getSchema,
   runQuery,
   testConnection,

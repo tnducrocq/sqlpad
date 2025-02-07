@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
-import https from 'https';
-import { resolve } from 'path';
+import https from 'https'; 
 const NEXT_URI_TIMEOUT = 100;
 
 export default { send, startExecutionQuery, followExecutionQuery, cancelExecutionQuery };
@@ -65,7 +64,7 @@ function followExecutionQuery(config, executionId) {
   })
   .then((response) => response.json())
   .then((statement) => handleStatementAndGetMore(results, statement, config))
-  .catch(error => console.error('Error:', error));
+  .catch(error => console.error('Error(followExecutionQuery):', error));
 }
 
 // Given config and query, returns promise with the results
@@ -94,7 +93,7 @@ function startExecutionQuery(config, query) {
     }
     return match[1];
   })
-  .catch(error => console.error('Error:', error));
+  .catch(error => console.error('Error(startExecutionQuery):', error));
 }
 
 function updateResults(results, statement) {
@@ -104,6 +103,7 @@ function updateResults(results, statement) {
   if (statement.columns) {
     results.columns = statement.columns;
   }
+  results.executionId = statement.id;
   return results;
 }
 

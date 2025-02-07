@@ -24,11 +24,13 @@ class Connections {
     if (!driver) {
       copy.supportsConnectionClient = false;
       copy.isAsynchronous = false;
+      copy.hasCatalog = false;
     } else {
       copy.supportsConnectionClient = Boolean(
         drivers[connection.driver].Client
       );
       copy.isAsynchronous = Boolean(drivers[connection.driver].asynchronous);
+      copy.hasCatalog = Boolean(drivers[connection.driver].hasCatalog);
     }
 
     // For legacy use, spread driver-field data onto connection object
