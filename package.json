@@ -19,6 +19,10 @@
     "fixlint": "npm run fixlint --prefix client && npm run fixlint --prefix server && prettier --write \"**/*.js\"",
     "lint": "npm run lint --prefix client && npm run lint --prefix server && prettier --check \"**/*.js\"",
     "prepare": "husky",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "start:server": "cd server && node server.js --config \"./config.dev.env\"",
+    "start:client": "cd client && vite",
+    "copy": "cp -r client/build/* server/public",
+    "start": "npm run copy && npm run start:server"
   }
 }
