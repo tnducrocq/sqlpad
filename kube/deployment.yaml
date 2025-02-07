@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saagie-common-sqlpad
+  namespace: saagie
+  labels:
+    app: sqlpad
+spec:
+  selector:
+    matchLabels:
+      app: sqlpad
+  template:
+    metadata:
+      labels:
+        app: sqlpad
+    spec:
+      containers:
+        - name: sqlpad
+          image: tonyducrocq14/sqlpad:s1.18
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+          env:
+            - name: SQLPAD_PORT
+              value: "3000"
+            - name: SQLPAD_BASE_URL
+              value: "/sqlpad"
+            - name: SQLPAD_DB_PATH
+              value: "../db"
+            - name: SQLPAD_APP_LOG_LEVEL
+              value: "debug"
+            - name: SQLPAD_WEB_LOG_LEVEL
+              value: "debug"
+            - name: SQLPAD_QUERY_RESULT_MAX_ROWS
+              value: "100"
+            - name: SQLPAD_USERPASS_AUTH_DISABLED
+              value: "true"
+            - name: SQLPAD_DEFAULT_CONNECTION_ID
+              value: "saagietrino"
+            - name: SQLPAD_CONNECTIONS__saagietrino__driver
+              value: "trino"
+            - name: SQLPAD_CONNECTIONS__saagietrino__name
+              value: "saagietrino"
+            - name: SQLPAD_CONNECTIONS__saagietrino__host
+              value: "lakehouse-trino.lakehouse.svc.cluster.local"
+            - name: SQLPAD_CONNECTIONS__saagietrino__port
+              value: "8443"
+            - name: SQLPAD_CONNECTIONS__saagietrino__useHTTPS
+              value: "true"
+            - name: SQLPAD_SERVICE_TOKEN_SECRET
+              value: "secr3t"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saagie-common-sqlpad
+  namespace: saagie
+spec:
+  selector:
+    app: sqlpad
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    meta.helm.sh/release-name: saagie-common
+    meta.helm.sh/release-namespace: saagie
+    nginx.ingress.kubernetes.io/server-alias: ~^((?![0-9]+).+)-workspace.product.dev5194lkk6.saagie.co
+  labels:
+    app: sqlpad
+    app.kubernetes.io/instance: saagie-common
+    app.kubernetes.io/name: sqlpad
+    io.saagie/installationId: saagie
+    io.saagie/type: common
+    release: saagie-common
+  name: saagie-common-sqlpad
+  namespace: saagie
+spec:
+  rules:
+  - host: saagie-workspace.product.dev5194lkk6.saagie.co
+    http:
+      paths:
+      - backend:
+          service:
+            name: saagie-common-sqlpad
+            port:
+              name: http
+        path: /sqlpad/(.*)
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - saagie-workspace.product.dev5194lkk6.saagie.co
+    secretName: saagie-common-tls
