@@ -12,3 +12,11 @@ server/drivers/sqlite/sqlpad_test_sqlite.db
 server/test/artifacts
 server/test/fixtures/sales.sqlite
 client/.eslintcache
+
+.vscode/launch.json
+.yarn/
+.yarnrc.yml
+client/.yarn/
+server/.yarn/
+telepresence.json
+telepresence.log
