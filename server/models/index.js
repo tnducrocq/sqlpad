@@ -5,6 +5,7 @@ import Connections from './connections.js';
 import Queries from './queries.js';
 import QueryHistory from './query-history.js';
 import SchemaInfo from './schema-info.js';
+import CatalogInfo from './catalog-info.js';
 import ServiceTokens from './service-tokens.js';
 import Statements from './statements.js';
 import Tags from './tags.js';
@@ -38,6 +39,7 @@ class Models {
     this.queries = new Queries(sequelizeDb, config);
     this.queryHistory = new QueryHistory(sequelizeDb, config);
     this.schemaInfo = new SchemaInfo(sequelizeDb, config);
+    this.catalogInfo = new CatalogInfo(sequelizeDb, config);
     this.serviceTokens = new ServiceTokens(sequelizeDb, config);
     this.statements = new Statements(sequelizeDb, config);
     this.tags = new Tags(sequelizeDb, config);

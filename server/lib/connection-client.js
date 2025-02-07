@@ -172,7 +172,7 @@ class ConnectionClient {
    * it'll use the database connection already established.
    * If not connected or does not support persistent connection,
    * it uses the driver.runQuery() implementation that will open a connection, run query, then close.
-   * @param {string} query
+   * @param {string} query or executionQuery in asynchronous
    * @returns {Promise}
    */
   async runQuery(query) {
@@ -208,7 +208,7 @@ class ConnectionClient {
         this.lastActivityAt = new Date();
       } else {
         // Opens a new connection to db, runs query, then closes connection
-        results = await driver.runQuery(query, connection);
+        results = await driver.runQuery(query, connection, user);
       }
     } catch (error) {
       // It is logged INFO because it isn't necessarily a server/application error
@@ -307,7 +307,7 @@ class ConnectionClient {
         this.lastActivityAt = new Date();
       } else {
         // Opens a new connection to db, runs query, then closes connection
-        executionId = await driver.startQueryExecution(query, connection);
+        executionId = await driver.startQueryExecution(query, connection, user);
       }
     } catch (error) {
       // It is logged INFO because it isn't necessarily a server/application error
@@ -382,7 +382,7 @@ class ConnectionClient {
         this.lastActivityAt = new Date();
       } else {
         // Opens a new connection to db, runs query, then closes connection
-        await driver.cancelQuery(query, connection);
+        await driver.cancelQuery(query, connection, user);
       }
     } catch (error) {
       // It is logged INFO because it isn't necessarily a server/application error
@@ -416,7 +416,7 @@ class ConnectionClient {
    * it is considered a successful connection config
    */
   testConnection() {
-    return this.driver.testConnection(this.connection);
+    return this.driver.testConnection(this.connection, this.user);
   }
 
   /**
@@ -424,7 +424,27 @@ class ConnectionClient {
    * This data is used by client to build schema tree in editor sidebar
    * @returns {Promise}
    */
-  getSchema() {
+  getSchema(catalog) {
+    let connectionMaxed = {
+      ...this.connection,
+      // 1 million rows ought to be enough for pulling schema.
+      // Schema probably needs to be broken up into getting tables (and their schemas), and then batching column reads
+      maxRows: 1000000,
+    };
+    if (catalog) {
+      connectionMaxed.catalog = catalog
+    }
+    // TODO refacto to use catalog in getSchema
+    
+    return this.driver.getSchema(connectionMaxed, this.user);
+  }
+
+  /**
+   * Gets catalog (sometimes called catalogInfo) for connection
+   * This data is used by client to build catalog tree in editor sidebar
+   * @returns {Promise}
+   */
+  getCatalog() {
     // Increase the max rows without modifiying original connection
     const connectionMaxed = {
       ...this.connection,
@@ -432,7 +452,7 @@ class ConnectionClient {
       // Schema probably needs to be broken up into getting tables (and their schemas), and then batching column reads
       maxRows: 1000000,
     };
-    return this.driver.getSchema(connectionMaxed);
+    return this.driver.getCatalog(connectionMaxed, this.user);
   }
 
   /**
@@ -446,6 +466,30 @@ class ConnectionClient {
     const identifier = formatVersion
       ? `schemacache${formatVersion}:`
       : 'schemacache:';
+
+    const keyValuesString = Object.keys(this.connection)
+      .sort()
+      .map((key) => {
+        return `${key}:${this.connection[key]}`;
+      })
+      .join('::');
+
+    return (
+      identifier + uuidv5(keyValuesString, consts.CONNECTION_HASH_NAMESPACE)
+    );
+  }
+
+  /**
+   * A given connection may no longer return the same result given user template support
+   * To ensure schema is appropriately cached an ID must be derived from the resulting connection for a user
+   * Its possible and likely that a given connection will be the same for a few users,
+   * so we don't want to cache this on (connectionId, userId) pairing.
+   * Instead we'll use a hash of connection after template rendering
+   */
+  getCatalogCacheId(formatVersion) {
+    const identifier = formatVersion
+      ? `catalogcache${formatVersion}:`
+      : 'catalogcache:';
 
     const keyValuesString = Object.keys(this.connection)
       .sort()

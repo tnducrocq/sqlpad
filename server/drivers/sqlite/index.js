@@ -118,12 +118,13 @@ function dbAllAsync(db, query) {
  * Should return { rows, incomplete }
  * @param {string} query
  * @param {object} connection
+ * @param {object} user
  */
-async function runQuery(query, connection) {
+async function runQuery(query, connection, user) {
   const db = new Client(connection);
   await db.connect();
   try {
-    const result = await db.runQuery(query);
+    const result = await db.runQuery(query, connection, user);
     await db.disconnect();
     return result;
   } catch (error) {
@@ -136,9 +137,9 @@ async function runQuery(query, connection) {
  * Test connectivity of connection
  * @param {*} connection
  */
-function testConnection(connection) {
+function testConnection(connection, user) {
   const query = "SELECT 'success' AS TestQuery;";
-  return runQuery(query, connection);
+  return runQuery(query, connection, user);
 }
 
 /**
@@ -190,11 +191,20 @@ async function getSchema(connection) {
   }
 }
 
+/**
+ * Get catalog for connection
+ * @param {*} connection
+ */
+async function getCatalog(connection) {
+  return [];
+}
+
 export default {
   Client,
   id,
   name,
   fields,
+  getCatalog,
   getSchema,
   runQuery,
   testConnection,

@@ -34,6 +34,8 @@ import routeConnections from './routes/connections.js';
 import routeConnectionAccesses from './routes/connection-accesses.js';
 import routeConnectionClients from './routes/connection-clients.js';
 import routeConnectionSchema from './routes/connection-schema.js';
+import routeConnectionCatalog from './routes/connection-catalog.js';
+import routeConnectionCatalogSchema from './routes/connection-catalog-schema.js';
 import routeTestConnection from './routes/test-connection.js';
 import routeQueryHistory from './routes/query-history.js';
 import routeSchemaInfo from './routes/schema-info.js';
@@ -236,6 +238,8 @@ async function makeApp(config, models) {
     routeConnectionAccesses,
     routeConnectionClients,
     routeConnectionSchema,
+    routeConnectionCatalog,
+    routeConnectionCatalogSchema,
     routeTestConnection,
     routeQueryHistory,
     routeSchemaInfo,
@@ -247,7 +251,9 @@ async function makeApp(config, models) {
   ];
 
   // Add all core routes to the baseUrl except for the */api/app route
-  authRequiredRouters.forEach((router) => app.use(baseUrl, router));
+  authRequiredRouters.forEach((router) => {
+    app.use(baseUrl, router)
+  });
 
   // Add '*/api/app' route last and without baseUrl
   app.use(routeApp);

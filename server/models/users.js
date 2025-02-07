@@ -92,6 +92,7 @@ class Users {
         'email',
         'ldapId',
         'role',
+        'token',
         'disabled',
         'signupAt',
         'createdAt',

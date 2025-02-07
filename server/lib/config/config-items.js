@@ -82,7 +82,7 @@ const configItems = [
   {
     key: 'baseUrl',
     envVar: 'SQLPAD_BASE_URL',
-    default: '',
+    default: '/pad',
   },
   {
     key: 'passphrase',

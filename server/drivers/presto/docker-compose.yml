@@ -1,5 +1,0 @@
-services:
-  presto:
-    image: harisekhon/presto-dev:latest
-    ports:
-      - '8080:8080'

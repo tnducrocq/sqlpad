@@ -1,5 +1,0 @@
-services:
-  drill:
-    image: harisekhon/apache-drill:latest
-    ports:
-      - '8047:8047'
