@@ -1,7 +1,7 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import Select from '../common/Select';
-import {
-  loadSchema,
+import { 
+  loadSchemaCatalog,
   selectCatalog,
 } from '../stores/editor-actions';
 import { useSessionCatalog, useSessionConnectionId } from '../stores/editor-store';
@@ -14,12 +14,10 @@ export function CatalogDropdown() {
   const { data: catalogsData } = api.useCatalogs(selectedConnectionId);
   const catalogs = catalogsData || [];
 
-
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {  
     const catalog = event.target.value;
-    console.log("CatalogDropdown: handleChange: ", catalog);
     selectCatalog(selectedConnectionId, catalog); 
-    loadSchema(selectedConnectionId, catalog, true);
+    loadSchemaCatalog(selectedConnectionId, catalog, true);
   };
  
   const style = { width: 220 };

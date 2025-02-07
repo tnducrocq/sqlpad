@@ -10,6 +10,7 @@ export interface Connection {
   name: string;
   supportsConnectionClient: boolean;
   isAsynchronous: boolean;
+  hasCatalog: boolean;
   updatedAt: string | Date;
 }
 

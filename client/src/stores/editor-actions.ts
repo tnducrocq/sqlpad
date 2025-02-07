@@ -9,9 +9,10 @@ import {
   ChartFields,
   Connection,
   ConnectionClient,
+  ConnectionSchema,
   QueryResultFormat,
 } from '../types';
-import { api } from '../utilities/api';
+import { api, FetchResponse } from '../utilities/api';
 import { getHistory } from '../utilities/history';
 import {
   removeLocalQueryText,
@@ -129,6 +130,9 @@ export const initEditor = async (
     let [selectedConnectionId] = await Promise.all([
       localforage.getItem('selectedConnectionId'),
     ]);
+    let [selectedCatalog] = await Promise.all([
+      localforage.getItem('selectedCatalog'),
+    ]);
 
     let initialConnectionId = '';
     let initialCatalog = '';
@@ -177,10 +181,16 @@ export const initEditor = async (
       }
     }
 
+    if (typeof selectedCatalog === 'string') {
+        initialCatalog = selectedCatalog;
+    }
+
     const { focusedSessionId } = getState();
-    setSession(focusedSessionId, { connectionId: initialConnectionId });
+    setSession(focusedSessionId, { connectionId: initialConnectionId, catalog: initialCatalog });
     if (initialConnectionId && initialCatalog) {
-      loadSchema(initialConnectionId, initialCatalog);
+      loadSchemaCatalog(initialConnectionId, initialCatalog);
+    } else if (initialConnectionId) {
+      loadSchema(initialConnectionId);
     }
     setState({ initialized: true });
   } catch (error) {
@@ -230,6 +240,7 @@ export async function connectConnectionClient() {
 
   if (connection) {
     setAsynchronousDriver(connection.isAsynchronous);
+    setCatalogDriver(connection.hasCatalog);
   }
 
   const supportedAndEnabled =
@@ -251,6 +262,7 @@ export async function connectConnectionClient() {
   setSession(focusedSessionId, {
     connectionClient: json.data,
     isDriverAsynchronous: connection ? connection.isAsynchronous : false,
+    isDriverCatalog: connection ? connection.hasCatalog : false,
   });
 }
 
@@ -319,7 +331,7 @@ export function selectCatalog(connectionId: string, catalog: string) {
   localforage
     .setItem('selectedCatalog', catalog)
     .catch((error) => message.error(error));
-
+ 
   setSession(focusedSessionId, {
     connectionId,
     catalog
@@ -858,7 +870,28 @@ export function setSchemaState(connectionId: string, schemaState: SchemaState) {
  * @param connectionId - connection id to get schema for
  * @param reload - force cache refresh for schema
  */
-export async function loadSchema(connectionId: string, catalog: string, reload?: boolean) {
+export async function loadSchema(connectionId: string, reload?: boolean) {
+  return loadSchemaFromConnection(connectionId, () => api.getConnectionSchema(connectionId, reload), reload);  
+}
+
+/**
+ * Get schema via API and store into editor store
+ * @param connectionId - connection id to get schema for
+ * @param catalog - catalog name to get schema for
+ * @param reload - force cache refresh for schema
+ */
+export async function loadSchemaCatalog(connectionId: string, catalog: string, reload?: boolean) {
+  return loadSchemaFromConnection(connectionId, () => api.getConnectionCatalogSchema(connectionId, catalog, reload), reload);    
+}
+
+/**
+ * Get schema via API and store into editor store
+ * @param connectionId - connection id to get schema for
+ * @param api - api method
+ * @param reload - force cache refresh for schema
+ */
+async function loadSchemaFromConnection(connectionId: string, getConnectionSchema: () =>  Promise<FetchResponse<ConnectionSchema>>, reload?: boolean) {
+  
   const { schemaStates, focusedSessionId } = getState();
   const { showSchema, schemaExpansions } = getState().getFocusedSession();
 
@@ -867,7 +900,7 @@ export async function loadSchema(connectionId: string, catalog: string, reload?:
       loading: true,
     });
 
-    const json = await api.getConnectionCatalogSchema(connectionId, catalog, reload);
+    const json = await getConnectionSchema();
     const { error, data } = json;
 
     if (error) {
@@ -957,5 +990,22 @@ export function setAsynchronousDriver(asynchronous?: boolean) {
   const isAsync = asynchronous ? true : false;
   setSession(focusedSessionId, {
     isDriverAsynchronous: isAsync,
+  });
+}
+
+export function setCatalogDriver(hasCatalog?: boolean) {
+  const { focusedSessionId } = getState();
+
+  const hasDriverCatalog = hasCatalog ? true : false;
+  setSession(focusedSessionId, {
+    isDriverCatalog: hasDriverCatalog
+  });
+}
+
+export function setCatalog(catalog: string) {
+  const { focusedSessionId } = getState();
+ 
+  setSession(focusedSessionId, {
+    catalog: catalog
   });
 }

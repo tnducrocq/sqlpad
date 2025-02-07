@@ -9,8 +9,12 @@ import ToolbarCancelButton from './ToolbarCancelButton';
 import ToolbarSpacer from './ToolbarSpacer';
 import ToolbarToggleSchemaButton from './ToolbarToggleSchemaButton';
 import { CatalogDropdown } from './CatalogDropdown';
+import { useEditorStore, useSessionCatalogDriver } from '../stores/editor-store';
+
+const { getState } = useEditorStore;
 
 function Toolbar() {
+  const isDriverCatalog = useSessionCatalogDriver(); 
   return (
     <div
       style={{
@@ -24,7 +28,11 @@ function Toolbar() {
         <ToolbarToggleSchemaButton />
         <ConnectionDropDown />
         <ToolbarSpacer />
-        <CatalogDropdown />
+        { isDriverCatalog ? ( 
+          <CatalogDropdown />
+        ) : (
+          <></>
+        )}
         <ToolbarSpacer />
         <ToolbarConnectionClientButton />
         <ToolbarSpacer grow />

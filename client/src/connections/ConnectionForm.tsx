@@ -11,7 +11,7 @@ import Select from '../common/Select';
 import SpinKitCube from '../common/SpinKitCube';
 import TextArea from '../common/TextArea';
 import { api } from '../utilities/api';
-import { setAsynchronousDriver } from '../stores/editor-actions';
+import { setAsynchronousDriver, setCatalogDriver } from '../stores/editor-actions';
 
 const TEXT = 'TEXT';
 const PASSWORD = 'PASSWORD';
@@ -128,7 +128,8 @@ function ConnectionForm({ connectionId, onConnectionSaved }: any) {
     }
     if (json.data) {
       setAsynchronousDriver(json.data.isAsynchronous);
-    }
+      setCatalogDriver(json.data.hasCatalog);
+    } 
     api.reloadConnections();
     return onConnectionSaved(json.data);
   };

@@ -23,7 +23,7 @@ import { Links, parseLinkHeader } from '../utilities/parse-link-header';
 import { apiBaseUrl } from './baseUrl';
 import swrFetcher from './swr-fetcher';
 
-interface FetchResponse<DataT> {
+export interface FetchResponse<DataT> {
   data?: DataT;
   error?: string;
   links?: Links;

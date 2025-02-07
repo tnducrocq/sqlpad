@@ -19,10 +19,11 @@ import Sidebar from '../common/Sidebar';
 import SpinKitCube from '../common/SpinKitCube';
 import Text from '../common/Text';
 import Tooltip from '../common/Tooltip';
-import { loadSchema, toggleSchemaItem } from '../stores/editor-actions';
+import { loadSchema, loadSchemaCatalog, toggleSchemaItem } from '../stores/editor-actions';
 import {
   useSchemaState,
   useSessionCatalog,
+  useSessionCatalogDriver,
   useSessionConnectionId,
   useSessionSchemaExpanded,
 } from '../stores/editor-store';
@@ -82,7 +83,9 @@ function CopyMenuItem({ id, value }: { id: string; value: string }) {
 
 function SchemaSidebar() {
   const connectionId = useSessionConnectionId();
+  const catalogDriver = useSessionCatalogDriver();
   const catalog = useSessionCatalog();
+  
   const [search, setSearch] = useState('');
   const [dimensions, setDimensions] = useState({
     width: -1,
@@ -98,8 +101,17 @@ function SchemaSidebar() {
 
   const handleRefreshClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (connectionId && catalog) {
-      loadSchema(connectionId, catalog, true);
+    if (!connectionId) {
+      return;
+    }
+    
+    if (catalogDriver) {
+      if (!catalog) {
+        return;        
+      }      
+      loadSchemaCatalog(connectionId, catalog, true);
+    } else {
+      loadSchema(connectionId, true);
     }
   };
 

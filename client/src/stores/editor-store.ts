@@ -29,9 +29,9 @@ export interface EditorSession {
   id: string;
   showSchema: boolean;
   showVisProperties: boolean;
-  catalog: string;
   schemaExpansions: { [conectionId: string]: ExpandedMap };
   connectionId: string;
+  catalog: string;
   connectionClient?: ConnectionClient;
   batchId?: string;
   isRunning: boolean;
@@ -39,6 +39,7 @@ export interface EditorSession {
   isExecutionStarting: boolean;
   saveError?: string;
   isDriverAsynchronous: boolean;
+  isDriverCatalog: boolean;
   // Editor session takes Query model fields and flattens
   queryId?: string;
   queryName: string;
@@ -80,14 +81,15 @@ export const INITIAL_SESSION: EditorSession = {
   id: INITIAL_SESSION_ID,
   showSchema: true,
   showVisProperties: false,
-  catalog: '',
   schemaExpansions: {},
   connectionId: '',
+  catalog: '',
   connectionClient: undefined,
   batchId: undefined,
   isRunning: false,
   isExecutionStarting: false,
   isDriverAsynchronous: false,
+  isDriverCatalog: false,
   isSaving: false,
   saveError: undefined,
   queryId: undefined,
@@ -297,16 +299,6 @@ export function useSessionSchemaExpanded(connectionId?: string) {
   });
 }
 
-export function useCatalogState(connectionId?: string) {
-  return useEditorStore((s) => {
-    if (!connectionId || !s.catalogStates[connectionId]) {
-      const emptyCatalogState: CatalogState = { loading: false };
-      return emptyCatalogState;
-    }
-    return s.catalogStates[connectionId];
-  });
-}
-
 export function useSchemaState(connectionId?: string) {
   return useEditorStore((s) => {
     if (!connectionId || !s.schemaStates[connectionId]) {
@@ -459,4 +451,8 @@ export function useStatementText(statementId?: string) {
 
 export function useSessionAsyncDriver(): boolean {
   return useEditorStore((s) => s.getFocusedSession().isDriverAsynchronous);
+}
+
+export function useSessionCatalogDriver(): boolean {
+  return useEditorStore((s) => s.getFocusedSession().isDriverCatalog);
 }
