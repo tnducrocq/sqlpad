@@ -15,7 +15,10 @@ const PROXY_ROUTES = [
   '/auth/oidc',
 ];
 
-const PROXY_URL = 'http://127.0.0.1:3010';
+const PROXY_URL =
+  process.env.TELEPRESENCE === 'true'
+    ? 'http://saagie-common-sqlpad-api.saagie.svc.cluster.local:3000'
+    : 'http://127.0.0.1:3010';
 
 const proxy: Record<string, string> = {};
 
@@ -30,20 +33,13 @@ proxy['^/.*/api/app'] = PROXY_URL;
 
 // https://vitejs.dev/config/
 const getConfig = ({ command, mode }) => {
-  let base: string | undefined = process.env['VITE_SPA_BASE_URL_OVERRIDE'];
-
-  // command is either build or serve
-  if (command === 'serve') {
-    base = '/sqlpad/';
-  }
-
   return {
-    base,
+    base: '/sqlpad',
     plugins: [react()],
     server: {
       port: 3000,
       proxy,
-      allowedHosts: true
+      allowedHosts: true,
     },
     build: {
       outDir: 'build',
